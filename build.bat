@@ -2,5 +2,5 @@
 
 mkdir .\compiled\
 pushd .\compiled\
-cl -FC -Zi ..\rolamade.cpp user32.lib gdi32.lib kernel32.lib xinput.lib
+cl -FAsc -Zi ..\rolamade.cpp user32.lib gdi32.lib kernel32.lib xinput.lib dsound.lib
 popd

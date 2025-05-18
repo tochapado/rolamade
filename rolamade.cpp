@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <xinput.h>
+#include <dsound.h>
 
 #define internal static
 #define local_persist static
@@ -47,13 +48,13 @@ struct win32_window_dimension
   int Height;
 };
 
-// Loculrada BELOW!! OLDER C THAN C ITSELF
+// // Loculrada BELOW!! OLDER C THAN C ITSELF
 
 // #define X_INPUT_GET_STATE(name) DWORD WINAPI name(DWORD dwUserIndex, XINPUT_STATE *pState);
 // typedef X_INPUT_GET_STATE(x_input_get_state);
 // X_INPUT_GET_STATE(XInputGetStateStub)
 // {
-//   return(0);
+//   return(ERROR_DEVICE_NOT_CONNECTED);
 // };
 // global_variable x_input_get_state *XInputGetState_ = XInputGetStateStub;
 // #define XInputGetState XInputGetState_;
@@ -62,22 +63,58 @@ struct win32_window_dimension
 // typedef X_INPUT_SET_STATE(x_input_set_state);
 // X_INPUT_SET_STATE(XInputSetStateStub)
 // {
-//   return(0);
+//   return(ERROR_DEVICE_NOT_CONNECTED);
 // };
 // global_variable x_input_set_state *XInputSetState_ = XInputSetStateStub;
 // #define XInputSetState XInputSetState_;
 
-// Loads the dll instead the library on the compile time
-
 // internal void Win32LoadXInput(void)
 // {
-//   HMODULE XInputLibrary = LoadLibrary("xinput1_3.dll");
+//   HMODULE XInputLibrary = LoadLibrary("xinput1_4.dll");
+//   if(!XInputLibrary)
+//   {
+//      XInputLibrary = LoadLibrary("xinput1_3.dll");
+//   };
+//
 //   if(XInputLibrary)
 //   {
-//     XInputGetState = (x_input_get_state *)GetProcAddress(XInputLibrary, "XInputGetState");
-//     XInputSetState = (x_input_set_state *)GetProcAddress(XInputLibrary, "XInputSetState");
-//   };
+//      XInputGetState = (x_input_get_state *)GetProcAddress(XInputLibrary, "XInputGetState");
+//      XInputSetState = (x_input_set_state *)GetProcAddress(XInputLibrary, "XInputSetState");
+//      
+//   }
+//   else
+//   {
+//     // Diagnostic
+//   }
 // };
+
+internal void Win32InitDSound(HWND Window)
+{
+  // Load de DirectSound Library
+  HMODULE DSoundLibrary = LoadLibraryA("dsound.dll");
+  if(DSoundLibrary)
+  {
+    // Get a DirectSound object
+    LPDIRECTSOUND DirectSound;
+    if(SUCCEEDED(DirectSoundCreate(0, &DirectSound, 0)))
+    {
+      // Create a primary buffer
+    
+      // Create a secondary buffer
+    
+      // Start it playing
+
+    }
+    else
+    {
+      // Diagnostics
+    };
+
+  }else
+  {
+    // Diagnostics
+  };
+};
 
 internal win32_window_dimension Win32GetWindowDimension(HWND Window)
 {
@@ -231,6 +268,7 @@ LRESULT CALLBACK Win32MainWindowCallback(
 
       };
 
+      // Handles Alt+F4
       bool32 AltKeyWasDown = (LParam & (1 << 29));
       printf("%d", AltKeyWasDown);
       if((VKCode == VK_F4) && AltKeyWasDown)
@@ -278,23 +316,22 @@ int CALLBACK WinMain(
   LPSTR     CommandLine,
   int       ShowCode)
 {
-  WNDCLASS WindowClass = {};
+  WNDCLASSA *WindowClass = {};
 
   Win32ResizeDIBSection(&Global_BackBuffer, 1280, 720);
 
-  WindowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-  WindowClass.lpfnWndProc = Win32MainWindowCallback;
-  WindowClass.hInstance = Instance;
+  WindowClass->style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+  WindowClass->lpfnWndProc = Win32MainWindowCallback;
+  WindowClass->hInstance = Instance;
   //  WindowClass.hIcon;
-  WindowClass.lpszClassName = "Devia usar o x11";
+  WindowClass->lpszClassName = "Devia usar o x11";
 
-  if(RegisterClass(&WindowClass))
+  if(RegisterClassA(WindowClass))
   {
-    HWND Window = CreateWindowEx(
-      0,
-      WindowClass.lpszClassName,
+    HWND Window = CreateWindowA(
+      WindowClass->lpszClassName,
       "Rolamade Hero",
-      WS_OVERLAPPEDWINDOW|WS_VISIBLE,
+      WS_OVERLAPPEDWINDOW | WS_VISIBLE,
       CW_USEDEFAULT,
       CW_USEDEFAULT,
       CW_USEDEFAULT,
@@ -309,15 +346,19 @@ int CALLBACK WinMain(
     {
       HDC DeviceContext = GetDC(Window);
       
-      MSG Message;
       int XOffset = 0;
       int YOffset = 0;
       int num = 0;
 
+      // Win32LoadXInput();
+      Win32InitDSound(Window);
+
       GlobalRunning = true;
       while(GlobalRunning)
       {
-        while(PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
+      MSG Message;
+
+      while(PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
         {
           if(Message.message == WM_QUIT)
           {

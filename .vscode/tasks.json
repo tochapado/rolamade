@@ -1,0 +1,47 @@
+{
+    "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": [
+              "/C",
+              // Tried everything to make MSVC works, starting the editor by normal means instead of opening with "code ." command on the shitty Developer CrappyStudio terminal.. **nothing works**
+              "\"C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/VsDevCmd.bat\"",
+              "&&"
+            ]
+          }
+        }
+      },
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "cl.exe building rolamade.exe",
+            "command": "cl.exe",
+            "args": [
+               "/FAsc",
+                "/Zi",
+                "/EHsc",
+                "/nologo",
+                "/Fe${workspaceFolder}\\compiled\\${fileBasenameNoExtension}.exe",
+                "${file}",
+                "user32.lib",
+                "gdi32.lib",
+                "kernel32.lib",
+                "xinput.lib",
+                "dsound.lib"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "rolamade compile"
+        }
+    ],
+    "version": "2.0.0"
+}
